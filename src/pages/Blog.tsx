@@ -1,105 +1,127 @@
-
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Calendar, User, Clock, ArrowRight, BookOpen, Tag, Search } from "lucide-react";
 import Navbar from "../components/Navbar";
+import { Helmet } from "react-helmet";
+
+interface BlogPost {
+  id: number;
+  title: string;
+  category: string;
+  summary: string;
+  image: string;
+  author: string;
+  date: string;
+  readTime: string;
+  featured: boolean;
+}
 
 const Blog = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [activeCategory, setActiveCategory] = useState("all");
   const [visiblePosts, setVisiblePosts] = useState<number>(6);
+  const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
 
-  // Sample blog posts
-  const blogPosts = [
-    {
-      id: 1,
-      title: "10 Branding Trends to Watch in 2023",
-      category: "branding",
-      summary: "Explore the latest branding trends that are shaping the industry landscape and how businesses can stay ahead.",
-      image: "https://images.unsplash.com/photo-1501504905252-473c47e087f8?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2074&q=80",
-      author: "Jessica Chen",
-      date: "April 15, 2023",
-      readTime: "8 min read",
-      featured: true
-    },
-    {
-      id: 2,
-      title: "The Psychology of Color in Marketing",
-      category: "marketing",
-      summary: "Understand how color psychology influences consumer behavior and how to leverage it in your marketing strategy.",
-      image: "https://images.unsplash.com/photo-1496171367470-9ed9a91ea931?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
-      author: "Michael Rodriguez",
-      date: "May 3, 2023",
-      readTime: "10 min read",
-      featured: true
-    },
-    {
-      id: 3,
-      title: "UX Design Principles for Higher Conversion",
-      category: "web",
-      summary: "Learn the key UX design principles that can significantly improve your website's conversion rates.",
-      image: "https://images.unsplash.com/photo-1581291518633-83b4ebd1d83e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
-      author: "Sarah Johnson",
-      date: "June 12, 2023",
-      readTime: "12 min read",
-      featured: false
-    },
-    {
-      id: 4,
-      title: "Creating Compelling Brand Stories",
-      category: "content",
-      summary: "Discover how storytelling can elevate your brand and create deeper connections with your audience.",
-      image: "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
-      author: "David Park",
-      date: "July 8, 2023",
-      readTime: "9 min read",
-      featured: false
-    },
-    {
-      id: 5,
-      title: "Social Media Strategies for 2023",
-      category: "marketing",
-      summary: "Expert strategies to maximize your social media presence and engagement in the current digital landscape.",
-      image: "https://images.unsplash.com/photo-1432888622747-4eb9a8f5a07a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2174&q=80",
-      author: "Emma Wilson",
-      date: "August 20, 2023",
-      readTime: "7 min read",
-      featured: false
-    },
-    {
-      id: 6,
-      title: "The Future of Web Design: AI and Automation",
-      category: "web",
-      summary: "How artificial intelligence and automation are transforming the web design industry and what it means for businesses.",
-      image: "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
-      author: "Alex Thompson",
-      date: "September 5, 2023",
-      readTime: "11 min read",
-      featured: false
-    },
-    {
-      id: 7,
-      title: "Building a Consistent Brand Voice",
-      category: "branding",
-      summary: "Strategies for developing and maintaining a consistent brand voice across all communication channels.",
-      image: "https://images.unsplash.com/photo-1432888622747-4eb9a8f5a07a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2174&q=80",
-      author: "Olivia Brown",
-      date: "October 14, 2023",
-      readTime: "9 min read",
-      featured: false
-    },
-    {
-      id: 8,
-      title: "Video Marketing: Tips for Higher Engagement",
-      category: "content",
-      summary: "Proven techniques to create engaging video content that resonates with your target audience.",
-      image: "https://images.unsplash.com/photo-1492619375914-88005aa9e8fb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2046&q=80",
-      author: "Ryan Garcia",
-      date: "November 7, 2023",
-      readTime: "10 min read",
-      featured: false
+  useEffect(() => {
+    // Try to load blog posts from localStorage (if admin edited them)
+    const savedPosts = localStorage.getItem("blogPosts");
+    if (savedPosts) {
+      setBlogPosts(JSON.parse(savedPosts));
+    } else {
+      // Sample blog posts if none exist
+      const blogPosts = [
+        {
+          id: 1,
+          title: "10 Branding Trends to Watch in 2023",
+          category: "branding",
+          summary: "Explore the latest branding trends that are shaping the industry landscape and how businesses can stay ahead.",
+          image: "https://images.unsplash.com/photo-1501504905252-473c47e087f8?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2074&q=80",
+          author: "Jessica Chen",
+          date: "April 15, 2023",
+          readTime: "8 min read",
+          featured: true
+        },
+        {
+          id: 2,
+          title: "The Psychology of Color in Marketing",
+          category: "marketing",
+          summary: "Understand how color psychology influences consumer behavior and how to leverage it in your marketing strategy.",
+          image: "https://images.unsplash.com/photo-1496171367470-9ed9a91ea931?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
+          author: "Michael Rodriguez",
+          date: "May 3, 2023",
+          readTime: "10 min read",
+          featured: true
+        },
+        {
+          id: 3,
+          title: "UX Design Principles for Higher Conversion",
+          category: "web",
+          summary: "Learn the key UX design principles that can significantly improve your website's conversion rates.",
+          image: "https://images.unsplash.com/photo-1581291518633-83b4ebd1d83e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
+          author: "Sarah Johnson",
+          date: "June 12, 2023",
+          readTime: "12 min read",
+          featured: false
+        },
+        {
+          id: 4,
+          title: "Creating Compelling Brand Stories",
+          category: "content",
+          summary: "Discover how storytelling can elevate your brand and create deeper connections with your audience.",
+          image: "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
+          author: "David Park",
+          date: "July 8, 2023",
+          readTime: "9 min read",
+          featured: false
+        },
+        {
+          id: 5,
+          title: "Social Media Strategies for 2023",
+          category: "marketing",
+          summary: "Expert strategies to maximize your social media presence and engagement in the current digital landscape.",
+          image: "https://images.unsplash.com/photo-1432888622747-4eb9a8f5a07a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2174&q=80",
+          author: "Emma Wilson",
+          date: "August 20, 2023",
+          readTime: "7 min read",
+          featured: false
+        },
+        {
+          id: 6,
+          title: "The Future of Web Design: AI and Automation",
+          category: "web",
+          summary: "How artificial intelligence and automation are transforming the web design industry and what it means for businesses.",
+          image: "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
+          author: "Alex Thompson",
+          date: "September 5, 2023",
+          readTime: "11 min read",
+          featured: false
+        },
+        {
+          id: 7,
+          title: "Building a Consistent Brand Voice",
+          category: "branding",
+          summary: "Strategies for developing and maintaining a consistent brand voice across all communication channels.",
+          image: "https://images.unsplash.com/photo-1432888622747-4eb9a8f5a07a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2174&q=80",
+          author: "Olivia Brown",
+          date: "October 14, 2023",
+          readTime: "9 min read",
+          featured: false
+        },
+        {
+          id: 8,
+          title: "Video Marketing: Tips for Higher Engagement",
+          category: "content",
+          summary: "Proven techniques to create engaging video content that resonates with your target audience.",
+          image: "https://images.unsplash.com/photo-1492619375914-88005aa9e8fb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2046&q=80",
+          author: "Ryan Garcia",
+          date: "November 7, 2023",
+          readTime: "10 min read",
+          featured: false
+        }
+      ];
+      setBlogPosts(blogPosts);
     }
-  ];
+  }, []);
 
   // Categories
   const categories = [
@@ -148,8 +170,61 @@ const Blog = () => {
     setVisiblePosts(prev => prev + 6);
   };
 
+  const generateJsonLd = () => {
+    const blogListingData = {
+      "@context": "https://schema.org",
+      "@type": "Blog",
+      "headline": "Zoolyum Blog - Insights, Strategies, and Industry Knowledge",
+      "description": "Insights, strategies, and industry knowledge to help your business grow.",
+      "author": {
+        "@type": "Organization",
+        "name": "Zoolyum",
+        "url": window.location.origin
+      },
+      "blogPost": filteredPosts.map(post => ({
+        "@type": "BlogPosting",
+        "headline": post.title,
+        "description": post.summary,
+        "image": post.image,
+        "datePublished": new Date(post.date).toISOString(),
+        "author": {
+          "@type": "Person",
+          "name": post.author
+        },
+        "publisher": {
+          "@type": "Organization",
+          "name": "Zoolyum",
+          "logo": {
+            "@type": "ImageObject",
+            "url": `${window.location.origin}/og-image.png`
+          }
+        },
+        "mainEntityOfPage": {
+          "@type": "WebPage",
+          "@id": `${window.location.origin}/blog/${post.id}`
+        }
+      }))
+    };
+    
+    return JSON.stringify(blogListingData);
+  };
+
   return (
     <div className="min-h-screen bg-background">
+      <Helmet>
+        <title>Blog - Zoolyum | Insights, Strategies & Industry Knowledge</title>
+        <meta name="description" content="Explore our blog for insights, strategies, and industry knowledge to help your business grow. Digital marketing, web design, branding tips and more." />
+        <meta name="keywords" content="digital marketing, web design, branding, business strategy, content creation, SEO" />
+        <meta property="og:title" content="Blog - Zoolyum" />
+        <meta property="og:description" content="Insights, strategies, and industry knowledge to help your business grow." />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content={window.location.href} />
+        <meta property="og:image" content={`${window.location.origin}/og-image.png`} />
+        <script type="application/ld+json">
+          {generateJsonLd()}
+        </script>
+      </Helmet>
+      
       <Navbar />
       
       <div className="container mx-auto px-4 pt-32 pb-20">

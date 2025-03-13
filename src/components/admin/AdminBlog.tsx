@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -17,34 +17,22 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Pencil, Trash2, Plus, Eye } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 
-// Sample data
-const initialPosts = [
-  {
-    id: 1,
-    title: "10 Web Design Trends for 2023",
-    category: "Design",
-    excerpt: "Discover the latest trends shaping the web design landscape in 2023.",
-    content: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam euismod, nisl eget aliquam ultricies, nunc nisl aliquet nunc, vitae aliquam nisl nunc vitae nisl. Nullam euismod, nisl eget aliquam ultricies, nunc nisl aliquet nunc, vitae aliquam nisl nunc vitae nisl.",
-    author: "Jane Smith",
-    date: "2023-06-15",
-    image: "https://images.unsplash.com/photo-1581291518633-83b4ebd1d83e?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
-  },
-  {
-    id: 2,
-    title: "How to Optimize Your Site for SEO",
-    category: "Marketing",
-    excerpt: "Learn proven strategies to improve your website's search engine rankings.",
-    content: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam euismod, nisl eget aliquam ultricies, nunc nisl aliquet nunc, vitae aliquam nisl nunc vitae nisl. Nullam euismod, nisl eget aliquam ultricies, nunc nisl aliquet nunc, vitae aliquam nisl nunc vitae nisl.",
-    author: "John Doe",
-    date: "2023-05-22",
-    image: "https://images.unsplash.com/photo-1432888498266-38ffec3eaf0a?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
-  },
-];
+// Sample data structure
+interface BlogPost {
+  id: number;
+  title: string;
+  category: string;
+  excerpt: string;
+  content: string;
+  author: string;
+  date: string;
+  image: string;
+}
 
 const AdminBlog = () => {
-  const [posts, setPosts] = useState(initialPosts);
+  const [posts, setPosts] = useState<BlogPost[]>([]);
   const [isEditing, setIsEditing] = useState(false);
-  const [currentPost, setCurrentPost] = useState({
+  const [currentPost, setCurrentPost] = useState<BlogPost>({
     id: 0,
     title: "",
     category: "",
@@ -55,6 +43,45 @@ const AdminBlog = () => {
     image: "",
   });
   const { toast } = useToast();
+
+  useEffect(() => {
+    // Load blog posts from localStorage if available
+    const savedPosts = localStorage.getItem("blogPosts");
+    if (savedPosts) {
+      setPosts(JSON.parse(savedPosts));
+    } else {
+      // Initialize with sample data if no saved posts
+      const initialPosts = [
+        {
+          id: 1,
+          title: "10 Web Design Trends for 2023",
+          category: "Design",
+          excerpt: "Discover the latest trends shaping the web design landscape in 2023.",
+          content: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam euismod, nisl eget aliquam ultricies, nunc nisl aliquet nunc, vitae aliquam nisl nunc vitae nisl. Nullam euismod, nisl eget aliquam ultricies, nunc nisl aliquet nunc, vitae aliquam nisl nunc vitae nisl.",
+          author: "Jane Smith",
+          date: "2023-06-15",
+          image: "https://images.unsplash.com/photo-1581291518633-83b4ebd1d83e?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
+        },
+        {
+          id: 2,
+          title: "How to Optimize Your Site for SEO",
+          category: "Marketing",
+          excerpt: "Learn proven strategies to improve your website's search engine rankings.",
+          content: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam euismod, nisl eget aliquam ultricies, nunc nisl aliquet nunc, vitae aliquam nisl nunc vitae nisl. Nullam euismod, nisl eget aliquam ultricies, nunc nisl aliquet nunc, vitae aliquam nisl nunc vitae nisl.",
+          author: "John Doe",
+          date: "2023-05-22",
+          image: "https://images.unsplash.com/photo-1432888498266-38ffec3eaf0a?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
+        },
+      ];
+      setPosts(initialPosts);
+      localStorage.setItem("blogPosts", JSON.stringify(initialPosts));
+    }
+  }, []);
+
+  const savePosts = (updatedPosts: BlogPost[]) => {
+    localStorage.setItem("blogPosts", JSON.stringify(updatedPosts));
+    setPosts(updatedPosts);
+  };
 
   const handleAddNew = () => {
     setIsEditing(true);
@@ -70,13 +97,14 @@ const AdminBlog = () => {
     });
   };
 
-  const handleEdit = (post: typeof currentPost) => {
+  const handleEdit = (post: BlogPost) => {
     setIsEditing(true);
     setCurrentPost(post);
   };
 
   const handleDelete = (id: number) => {
-    setPosts(posts.filter(post => post.id !== id));
+    const updatedPosts = posts.filter(post => post.id !== id);
+    savePosts(updatedPosts);
     toast({
       title: "Post deleted",
       description: "The blog post has been removed successfully",
@@ -88,14 +116,16 @@ const AdminBlog = () => {
     
     if (posts.some(p => p.id === currentPost.id)) {
       // Update existing post
-      setPosts(posts.map(p => p.id === currentPost.id ? currentPost : p));
+      const updatedPosts = posts.map(p => p.id === currentPost.id ? currentPost : p);
+      savePosts(updatedPosts);
       toast({
         title: "Post updated",
         description: "The blog post has been updated successfully",
       });
     } else {
       // Add new post
-      setPosts([...posts, currentPost]);
+      const updatedPosts = [...posts, currentPost];
+      savePosts(updatedPosts);
       toast({
         title: "Post added",
         description: "The new blog post has been added successfully",
@@ -111,7 +141,7 @@ const AdminBlog = () => {
     setCurrentPost({ id: 0, title: "", category: "", excerpt: "", content: "", author: "", date: "", image: "" });
   };
 
-  const handlePreview = (post: typeof currentPost) => {
+  const handlePreview = (post: BlogPost) => {
     toast({
       title: "Post Preview",
       description: "This would show a preview of the post in a real implementation",

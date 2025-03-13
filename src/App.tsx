@@ -21,6 +21,8 @@ const App = () => (
       <meta charSet="UTF-8" />
       <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       <meta name="theme-color" content="#FF5001" />
+      <meta name="description" content="Zoolyum - Creative agency specializing in branding, web design, and digital marketing solutions that drive results." />
+      <meta name="keywords" content="creative agency, branding, web design, digital marketing, UI/UX design" />
     </Helmet>
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>

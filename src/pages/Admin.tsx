@@ -11,6 +11,7 @@ import AdminPortfolio from "@/components/admin/AdminPortfolio";
 import AdminCaseStudies from "@/components/admin/AdminCaseStudies";
 import AdminBlog from "@/components/admin/AdminBlog";
 import AdminFooter from "@/components/admin/AdminFooter";
+import AdminFAQ from "@/components/admin/AdminFAQ";
 
 const Admin = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -118,6 +119,7 @@ const Admin = () => {
             <TabsTrigger value="portfolio">Portfolio</TabsTrigger>
             <TabsTrigger value="case-studies">Case Studies</TabsTrigger>
             <TabsTrigger value="blog">Blog</TabsTrigger>
+            <TabsTrigger value="faq">FAQ</TabsTrigger>
             <TabsTrigger value="footer">Footer</TabsTrigger>
           </TabsList>
           
@@ -135,6 +137,10 @@ const Admin = () => {
           
           <TabsContent value="blog">
             <AdminBlog />
+          </TabsContent>
+          
+          <TabsContent value="faq">
+            <AdminFAQ />
           </TabsContent>
           
           <TabsContent value="footer">
