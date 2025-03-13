@@ -1,5 +1,4 @@
-
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
@@ -12,9 +11,98 @@ import CaseStudyPreview from "@/components/CaseStudyPreview";
 import BlogPreview from "@/components/BlogPreview";
 import FAQ from "@/components/FAQ";
 import { Helmet } from "react-helmet";
-import { Facebook, Instagram, Linkedin, Twitter } from "lucide-react";
+import Footer, { FooterData } from "@/components/Footer";
+
+// Default footer data if localStorage is empty
+const defaultFooterData: FooterData = {
+  sections: [
+    {
+      id: 1,
+      title: "EXPLORE",
+      links: [
+        { id: 1, title: "About Us", url: "/about", isExternal: false },
+        { id: 2, title: "Our Mission", url: "/mission", isExternal: false },
+        { id: 3, title: "Meet the Team", url: "/team", isExternal: false },
+        { id: 4, title: "Success Stories", url: "/success-stories", isExternal: false },
+        { id: 5, title: "Collaborations", url: "/collaborations", isExternal: false },
+      ],
+    },
+    {
+      id: 2,
+      title: "SERVICES",
+      links: [
+        { id: 6, title: "Creative Collaborations", url: "/services/collaborations", isExternal: false },
+        { id: 7, title: "Branding & Visual Identity", url: "/services/branding", isExternal: false },
+        { id: 8, title: "Workshops & Masterclasses", url: "/services/workshops", isExternal: false },
+        { id: 9, title: "Consultation Services", url: "/services/consultation", isExternal: false },
+        { id: 10, title: "Art Exhibitions", url: "/services/exhibitions", isExternal: false },
+        { id: 11, title: "Online Community", url: "/services/community", isExternal: false },
+      ],
+    },
+    {
+      id: 3,
+      title: "CONNECT",
+      links: [
+        { id: 12, title: "Contact Us", url: "/contact", isExternal: false },
+        { id: 13, title: "Join Our Newsletter", url: "/newsletter", isExternal: false },
+        { id: 14, title: "Follow Us on Instagram", url: "https://instagram.com/zoolyum", isExternal: true },
+        { id: 15, title: "Like Us on Facebook", url: "https://facebook.com/zoolyum", isExternal: true },
+        { id: 16, title: "Subscribe on YouTube", url: "https://youtube.com/zoolyum", isExternal: true },
+      ],
+    },
+    {
+      id: 4,
+      title: "RESOURCES",
+      links: [
+        { id: 17, title: "Blog", url: "/blog", isExternal: false },
+        { id: 18, title: "Creative Tools", url: "/tools", isExternal: false },
+        { id: 19, title: "Industry Trends", url: "/industry", isExternal: false },
+        { id: 20, title: "Event Calendar", url: "/events", isExternal: false },
+        { id: 21, title: "FAQs", url: "/faq", isExternal: false },
+      ],
+    },
+    {
+      id: 5,
+      title: "LEGAL",
+      links: [
+        { id: 22, title: "Terms of Service", url: "/terms", isExternal: false },
+        { id: 23, title: "Privacy Policy", url: "/privacy", isExternal: false },
+        { id: 24, title: "Cookie Policy", url: "/cookies", isExternal: false },
+        { id: 25, title: "Refund Policy", url: "/refund", isExternal: false },
+        { id: 26, title: "Copyright Information", url: "/copyright", isExternal: false },
+        { id: 27, title: "Disclaimer", url: "/disclaimer", isExternal: false },
+      ],
+    },
+  ],
+  copyright: "© 2024 By Zoolyum. All Rights Reserved.",
+  socialLinks: {
+    facebook: "https://facebook.com/zoolyum",
+    twitter: "https://twitter.com/zoolyum",
+    linkedin: "https://linkedin.com/company/zoolyum",
+    instagram: "https://instagram.com/zoolyum",
+  },
+};
 
 const Index = () => {
+  // Load footer data from localStorage or use default
+  const [footerData, setFooterData] = useState<FooterData>(() => {
+    const savedData = localStorage.getItem('footerData');
+    return savedData ? JSON.parse(savedData) : defaultFooterData;
+  });
+
+  // Update footerData when localStorage changes (useful for admin changes)
+  useEffect(() => {
+    const handleStorageChange = () => {
+      const savedData = localStorage.getItem('footerData');
+      if (savedData) {
+        setFooterData(JSON.parse(savedData));
+      }
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
+
   useEffect(() => {
     const handleScroll = () => {
       const elements = document.querySelectorAll(".fade-up");
@@ -61,103 +149,7 @@ const Index = () => {
         <Contact />
       </main>
       
-      {/* New Footer with Multiple Columns */}
-      <footer className="bg-secondary text-white py-16">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
-            {/* EXPLORE Column */}
-            <div>
-              <h3 className="text-lg font-semibold mb-4">EXPLORE</h3>
-              <ul className="space-y-2">
-                <li><Link to="/about" className="text-gray-300 hover:text-white transition-colors">About Us</Link></li>
-                <li><Link to="/mission" className="text-gray-300 hover:text-white transition-colors">Our Mission</Link></li>
-                <li><Link to="/team" className="text-gray-300 hover:text-white transition-colors">Meet the Team</Link></li>
-                <li><Link to="/success-stories" className="text-gray-300 hover:text-white transition-colors">Success Stories</Link></li>
-                <li><Link to="/collaborations" className="text-gray-300 hover:text-white transition-colors">Collaborations</Link></li>
-              </ul>
-            </div>
-            
-            {/* SERVICES Column */}
-            <div>
-              <h3 className="text-lg font-semibold mb-4">SERVICES</h3>
-              <ul className="space-y-2">
-                <li><Link to="/services/collaborations" className="text-gray-300 hover:text-white transition-colors">Creative Collaborations</Link></li>
-                <li><Link to="/services/branding" className="text-gray-300 hover:text-white transition-colors">Branding & Visual Identity</Link></li>
-                <li><Link to="/services/workshops" className="text-gray-300 hover:text-white transition-colors">Workshops & Masterclasses</Link></li>
-                <li><Link to="/services/consultation" className="text-gray-300 hover:text-white transition-colors">Consultation Services</Link></li>
-                <li><Link to="/services/exhibitions" className="text-gray-300 hover:text-white transition-colors">Art Exhibitions</Link></li>
-                <li><Link to="/services/community" className="text-gray-300 hover:text-white transition-colors">Online Community</Link></li>
-              </ul>
-            </div>
-            
-            {/* CONNECT Column */}
-            <div>
-              <h3 className="text-lg font-semibold mb-4">CONNECT</h3>
-              <ul className="space-y-2">
-                <li><Link to="/contact" className="text-gray-300 hover:text-white transition-colors">Contact Us</Link></li>
-                <li><Link to="/newsletter" className="text-gray-300 hover:text-white transition-colors">Join Our Newsletter</Link></li>
-                <li><a href="https://instagram.com/zoolyum" target="_blank" rel="noreferrer" className="text-gray-300 hover:text-white transition-colors">Follow Us on Instagram</a></li>
-                <li><a href="https://facebook.com/zoolyum" target="_blank" rel="noreferrer" className="text-gray-300 hover:text-white transition-colors">Like Us on Facebook</a></li>
-                <li><a href="https://youtube.com/zoolyum" target="_blank" rel="noreferrer" className="text-gray-300 hover:text-white transition-colors">Subscribe on YouTube</a></li>
-              </ul>
-            </div>
-            
-            {/* RESOURCES Column */}
-            <div>
-              <h3 className="text-lg font-semibold mb-4">RESOURCES</h3>
-              <ul className="space-y-2">
-                <li><Link to="/blog" className="text-gray-300 hover:text-white transition-colors">Blog</Link></li>
-                <li><Link to="/tools" className="text-gray-300 hover:text-white transition-colors">Creative Tools</Link></li>
-                <li><Link to="/industry" className="text-gray-300 hover:text-white transition-colors">Industry Trends</Link></li>
-                <li><Link to="/events" className="text-gray-300 hover:text-white transition-colors">Event Calendar</Link></li>
-                <li><Link to="/faq" className="text-gray-300 hover:text-white transition-colors">FAQs</Link></li>
-              </ul>
-            </div>
-            
-            {/* LEGAL Column */}
-            <div>
-              <h3 className="text-lg font-semibold mb-4">LEGAL</h3>
-              <ul className="space-y-2">
-                <li><Link to="/terms" className="text-gray-300 hover:text-white transition-colors">Terms of Service</Link></li>
-                <li><Link to="/privacy" className="text-gray-300 hover:text-white transition-colors">Privacy Policy</Link></li>
-                <li><Link to="/cookies" className="text-gray-300 hover:text-white transition-colors">Cookie Policy</Link></li>
-                <li><Link to="/refund" className="text-gray-300 hover:text-white transition-colors">Refund Policy</Link></li>
-                <li><Link to="/copyright" className="text-gray-300 hover:text-white transition-colors">Copyright Information</Link></li>
-                <li><Link to="/disclaimer" className="text-gray-300 hover:text-white transition-colors">Disclaimer</Link></li>
-              </ul>
-            </div>
-          </div>
-          
-          {/* Separator Line */}
-          <div className="border-t border-gray-700 my-8"></div>
-          
-          {/* Bottom Footer Section */}
-          <div className="flex flex-col md:flex-row justify-between items-center">
-            {/* Quick Links */}
-            <div className="flex space-x-6 mb-4 md:mb-0">
-              <Link to="/terms" className="text-sm text-gray-300 hover:text-white transition-colors">Terms</Link>
-              <Link to="/privacy" className="text-sm text-gray-300 hover:text-white transition-colors">Privacy</Link>
-              <Link to="/cookies" className="text-sm text-gray-300 hover:text-white transition-colors">Cookies</Link>
-            </div>
-            
-            {/* Copyright */}
-            <div className="text-sm text-gray-300 mb-4 md:mb-0">© 2024 By Zoolyum. All Rights Reserved.</div>
-            
-            {/* Social Icons */}
-            <div className="flex space-x-4">
-              <a href="https://facebook.com/zoolyum" target="_blank" rel="noreferrer" className="bg-white bg-opacity-10 p-2 rounded-full hover:bg-opacity-20 transition-colors" aria-label="Facebook">
-                <Facebook size={18} />
-              </a>
-              <a href="https://linkedin.com/company/zoolyum" target="_blank" rel="noreferrer" className="bg-white bg-opacity-10 p-2 rounded-full hover:bg-opacity-20 transition-colors" aria-label="LinkedIn">
-                <Linkedin size={18} />
-              </a>
-              <a href="https://twitter.com/zoolyum" target="_blank" rel="noreferrer" className="bg-white bg-opacity-10 p-2 rounded-full hover:bg-opacity-20 transition-colors" aria-label="Twitter">
-                <Twitter size={18} />
-              </a>
-            </div>
-          </div>
-        </div>
-      </footer>
+      <Footer data={footerData} />
       
       <Toaster />
     </div>
